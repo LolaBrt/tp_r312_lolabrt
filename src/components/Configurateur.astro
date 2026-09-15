@@ -1,0 +1,55 @@
+---
+import BasketDessus from "../components/BasketDessus.astro";
+import BasketProfil from "../components/BasketProfil.astro";
+
+const configuration_basket = {
+  semelle: "#ffffff",
+  empeigne: "#ffffff",
+  pointe: "#ffffff",
+  oeillet: "#ffffff",
+  bande: "#ffffff",
+  languette: "#ffffff",
+  lacet: "#ffffff",
+  trimestre: "#ffffff",
+};
+---
+
+<div class="configurateur">
+  <BasketProfil {...configuration_basket} />
+  <BasketDessus {...configuration_basket} />
+
+  <form class="flex flex-wrap items-center justify-center gap-4 py-2">
+    {
+      Object.entries(configuration_basket).map(([partie, couleur]) => (
+        <div class="flex flex-col items-center">
+          <label for={partie} class="text-sm capitalize">
+            {partie}
+          </label>
+          <input type="color" id={partie} name={partie} value={couleur} />
+        </div>
+      ))
+    }
+  </form>
+</div>
+
+<script>
+  document
+    .querySelectorAll<HTMLElement>(".configurateur")
+    .forEach((configurateur) => {
+      const inputs = configurateur.querySelectorAll<HTMLInputElement>(
+        'input[type="color"]',
+      );
+
+      const colorier = (partie: string, couleur: string) => {
+        configurateur.querySelectorAll(`svg .${partie}`).forEach((element) => {
+          element.setAttribute("fill", couleur);
+        });
+      };
+
+      inputs.forEach((input) => {
+        input.addEventListener("input", () =>
+          colorier(input.name, input.value),
+        );
+      });
+    });
+</script>

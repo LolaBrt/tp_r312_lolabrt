@@ -1,0 +1,23 @@
+---
+console.log("Message A : écrit depuis le frontmatter");
+
+import BasketDessus from "../components/BasketDessus.astro";
+
+const message = "Message C : écrit depuis le frontmatter";
+---
+
+<div id="div1" data-message={message}>
+    <BasketDessus />
+</div>
+
+
+<script>
+  console.log("Message B : écrit depuis le script");
+  document.querySelectorAll(".div1").forEach((div) => {
+    const message = div.dataset.message;
+    console.log(message);
+    div.addEventListener("click", () => {
+      alert("Message D : écrit depuis le script");
+    });
+  });
+</script>

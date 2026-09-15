@@ -1,0 +1,12 @@
+schema: "classroom50/repo-config/v1"
+classroom: "r312-2026"
+assignment: "r312-tp-svg"
+owner:
+  username: "LolaBrt"
+  id: 232642721
+  accepted_at: "2026-09-15T07:04:59Z"
+source:
+  owner: "MMI-NFC-2025"
+  owner_id: 239367155
+  repo: "r312-tp-svg-template"
+  branch: "main"

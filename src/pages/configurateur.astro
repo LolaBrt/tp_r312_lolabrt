@@ -1,10 +1,33 @@
 ---
-export const prerender = false;
-
 import Layout from "../layouts/Layout.astro";
 import Configurateur from "../components/Configurateur.astro";
+
+export const prerender = false;
+
+const parties = [
+  "semelle",
+  "empeigne",
+  "pointe",
+  "oeillet",
+  "bande",
+  "languette",
+  "lacet",
+  "trimestre",
+];
+
+let configuration_recue: Record<string, string> | undefined;
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  configuration_recue = Object.fromEntries(
+    parties.map((partie) => [
+      partie,
+      formData.get(partie)?.toString() ?? "#ffffff",
+    ]),
+  );
+}
 ---
 
 <Layout>
-  <Configurateur />
+  <Configurateur configuration={configuration_recue} />
 </Layout>

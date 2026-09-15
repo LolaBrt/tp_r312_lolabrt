@@ -1,8 +1,12 @@
 ---
-import BasketDessus from "../components/BasketDessus.astro";
-import BasketProfil from "../components/BasketProfil.astro";
+import BasketProfil from "./BasketProfil.astro";
+import BasketDessus from "./BasketDessus.astro";
 
-const configuration_basket = {
+interface Props {
+  configuration?: Record<string, string>;
+}
+
+const configuration_defaut = {
   semelle: "#ffffff",
   empeigne: "#ffffff",
   pointe: "#ffffff",
@@ -12,13 +16,23 @@ const configuration_basket = {
   lacet: "#ffffff",
   trimestre: "#ffffff",
 };
+
+// Si une configuration a été transmise (après un POST), on l'utilise ; sinon on prend les valeurs par défaut
+const { configuration } = Astro.props;
+const configuration_basket = configuration ?? configuration_defaut;
 ---
 
-<div class="configurateur">
+<div
+  class="configurateur"
+  data-configuration-defaut={JSON.stringify(configuration_defaut)}
+>
   <BasketProfil {...configuration_basket} />
   <BasketDessus {...configuration_basket} />
 
-  <form class="flex flex-wrap items-center justify-center gap-4 py-2">
+  <form
+    method="POST"
+    class="flex flex-wrap items-center justify-center gap-4 py-2"
+  >
     {
       Object.entries(configuration_basket).map(([partie, couleur]) => (
         <div class="flex flex-col items-center">
@@ -29,6 +43,8 @@ const configuration_basket = {
         </div>
       ))
     }
+    <button type="submit">Valider</button>
+    <button type="button" class="reinitialiser">Réinitialiser</button>
   </form>
 </div>
 
@@ -36,6 +52,10 @@ const configuration_basket = {
   document
     .querySelectorAll<HTMLElement>(".configurateur")
     .forEach((configurateur) => {
+      const configurationDefaut: Record<string, string> = JSON.parse(
+        configurateur.dataset.configurationDefaut ?? "{}",
+      );
+
       const inputs = configurateur.querySelectorAll<HTMLInputElement>(
         'input[type="color"]',
       );
@@ -51,5 +71,14 @@ const configuration_basket = {
           colorier(input.name, input.value),
         );
       });
+
+      configurateur
+        .querySelector(".reinitialiser")
+        ?.addEventListener("click", () => {
+          inputs.forEach((input) => {
+            input.value = configurationDefaut[input.name];
+            colorier(input.name, input.value);
+          });
+        });
     });
 </script>

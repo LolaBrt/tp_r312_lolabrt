@@ -1,0 +1,145 @@
+---
+import BasketProfil from "./BasketProfil.astro";
+import BasketDessus from "./BasketDessus.astro";
+import db from "../lib/db.js";
+
+interface Props {
+  id: number;
+  description: string;
+  semelle: string;
+  empeigne: string;
+  pointe: string;
+  oeillet: string;
+  bande: string;
+  languette: string;
+  lacet: string;
+  trimestre: string;
+}
+
+const {
+  id,
+  semelle,
+  empeigne,
+  pointe,
+  oeillet,
+  bande,
+  languette,
+  lacet,
+  trimestre,
+} = Astro.props;
+
+let { description } = Astro.props;
+
+let configuration_basket = {
+  semelle,
+  empeigne,
+  pointe,
+  oeillet,
+  bande,
+  languette,
+  lacet,
+  trimestre,
+};
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+
+  description = formData.get("description")?.toString() ?? "";
+
+  configuration_basket = Object.fromEntries(
+    Object.keys(configuration_basket).map((partie) => [
+      partie,
+      formData.get(partie)?.toString() ?? "#ffffff",
+    ]),
+  ) as typeof configuration_basket;
+
+  db.run(
+    `UPDATE BASKETS
+     SET description = ?, semelle = ?, empeigne = ?, pointe = ?,
+         oeillet = ?, bande = ?, languette = ?, lacet = ?, trimestre = ?
+     WHERE id = ?`,
+    [
+      description,
+      configuration_basket.semelle,
+      configuration_basket.empeigne,
+      configuration_basket.pointe,
+      configuration_basket.oeillet,
+      configuration_basket.bande,
+      configuration_basket.languette,
+      configuration_basket.lacet,
+      configuration_basket.trimestre,
+      id,
+    ],
+  );
+}
+---
+
+<div
+  class="configurateur flex flex-col items-center"
+  data-configuration-defaut={JSON.stringify(configuration_basket)}
+>
+  <BasketProfil {...configuration_basket} />
+  <BasketDessus {...configuration_basket} />
+
+  <form
+    method="POST"
+    action={`/baskets/${id}`}
+    class="flex flex-wrap items-center justify-center gap-4 py-2"
+  >
+    <label for="description">Nom de la basket :</label>
+    <input
+      type="text"
+      id="description"
+      name="description"
+      value={description}
+      required
+    />
+    {
+      Object.entries(configuration_basket).map(([partie, couleur]) => (
+        <div class="flex flex-col items-center">
+          <label for={partie} class="text-sm capitalize">
+            {partie}
+          </label>
+          <input type="color" id={partie} name={partie} value={couleur} />
+        </div>
+      ))
+    }
+    <button type="submit">Valider</button>
+    <button type="button" class="reinitialiser">Réinitialiser</button>
+  </form>
+</div>
+
+<script>
+  document
+    .querySelectorAll<HTMLElement>(".configurateur")
+    .forEach((configurateur) => {
+      const configurationDefaut: Record<string, string> = JSON.parse(
+        configurateur.dataset.configurationDefaut ?? "{}",
+      );
+
+      const inputs = configurateur.querySelectorAll<HTMLInputElement>(
+        'input[type="color"]',
+      );
+
+      const colorier = (partie: string, couleur: string) => {
+        configurateur.querySelectorAll(`svg .${partie}`).forEach((element) => {
+          element.setAttribute("fill", couleur);
+        });
+      };
+
+      inputs.forEach((input) => {
+        input.addEventListener("input", () =>
+          colorier(input.name, input.value),
+        );
+      });
+
+      configurateur
+        .querySelector(".reinitialiser")
+        ?.addEventListener("click", () => {
+          inputs.forEach((input) => {
+            input.value = configurationDefaut[input.name];
+            colorier(input.name, input.value);
+          });
+        });
+    });
+</script>

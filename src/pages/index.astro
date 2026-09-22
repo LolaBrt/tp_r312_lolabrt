@@ -23,9 +23,9 @@ const baskets: Basket[] = db
             <h2 class="card-title">{basket.description}</h2>
 
             <div class="card-actions justify-end">
-              <button class="btn btn-primary" type="button">
+              <a href={`/baskets/${basket.id}`} class="btn btn-primary">
                 Modifier
-              </button>
+              </a>
             </div>
           </div>
         </div>

@@ -1,0 +1,33 @@
+---
+import Layout from "../layouts/Layout.astro";
+import BasketProfil from "../components/BasketProfil.astro";
+import db from "../lib/db.js";
+import type { Basket } from "../lib/db.ts";
+
+const baskets: Basket[] = db.prepare("SELECT * FROM BASKETS").all();
+---
+
+<Layout>
+  <h1 class="text-3xl font-bold underline text-primary">Hello world!</h1>
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      baskets.map((basket) => (
+        <div class="card bg-base-100 shadow-sm">
+          <figure class="p-4">
+            <BasketProfil {...basket} />
+          </figure>
+
+          <div class="card-body">
+            <h2 class="card-title">{basket.description}</h2>
+
+            <div class="card-actions justify-end">
+              <a href={`/baskets/${basket.id}`} class="btn btn-primary">
+                Modifier
+              </a>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</Layout>

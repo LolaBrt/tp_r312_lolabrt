@@ -26,3 +26,4 @@ pnpm-debug.log*
 READMEcopy.md
 TD*.md
 *.html
+data/db.sqlite*

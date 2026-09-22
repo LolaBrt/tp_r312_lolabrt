@@ -1,17 +1,35 @@
 ---
-import BasketDessus from '../components/BasketDessus.astro';
-import BasketProfil from '../components/BasketProfil.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import BasketProfil from "../components/BasketProfil.astro";
+import db from "../lib/db.js";
+import type { Basket } from "../lib/db.ts";
 
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const baskets: Basket[] = db
+  .prepare("SELECT * FROM BASKETS ORDER BY id DESC LIMIT 3")
+  .all();
 ---
 
 <Layout>
-	<h1 class="text-3xl font-bold underline text-primary">
-		Hello world!
-	</h1>
-	<BasketProfil/>
-	<BasketDessus/>
+  <h1 class="text-3xl font-bold underline text-primary">Hello world!</h1>
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      baskets.map((basket) => (
+        <div class="card bg-base-100 shadow-sm">
+          <figure class="p-4">
+            <BasketProfil {...basket} />
+          </figure>
+
+          <div class="card-body">
+            <h2 class="card-title">{basket.description}</h2>
+
+            <div class="card-actions justify-end">
+              <button class="btn btn-primary" type="button">
+                Modifier
+              </button>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
 </Layout>

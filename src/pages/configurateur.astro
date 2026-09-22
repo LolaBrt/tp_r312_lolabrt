@@ -2,6 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import Configurateur from "../components/Configurateur.astro";
 
+import db from "../lib/db.js";
+import type { Basket } from "../lib/db.js";
+
 export const prerender = false;
 
 const parties = [
@@ -19,11 +22,29 @@ let configuration_recue: Record<string, string> | undefined;
 
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
+  const description = formData.get("description");
   configuration_recue = Object.fromEntries(
     parties.map((partie) => [
       partie,
       formData.get(partie)?.toString() ?? "#ffffff",
     ]),
+  );
+
+  db.run(
+    `INSERT INTO BASKETS (user_id, description, semelle, empeigne, pointe, oeillet, bande, languette, lacet, trimestre)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      1, // user_id : à remplacer plus tard par un véritable utilisateur connecté
+      description,
+      configuration_recue.semelle,
+      configuration_recue.empeigne,
+      configuration_recue.pointe,
+      configuration_recue.oeillet,
+      configuration_recue.bande,
+      configuration_recue.languette,
+      configuration_recue.lacet,
+      configuration_recue.trimestre,
+    ],
   );
 }
 ---

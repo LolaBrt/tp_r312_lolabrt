@@ -33,6 +33,8 @@ const configuration_basket = configuration ?? configuration_defaut;
     method="POST"
     class="flex flex-wrap items-center justify-center gap-4 py-2"
   >
+    <label for="description">Nom de la basket :</label>
+    <input type="text" id="description" name="description" required />
     {
       Object.entries(configuration_basket).map(([partie, couleur]) => (
         <div class="flex flex-col items-center">

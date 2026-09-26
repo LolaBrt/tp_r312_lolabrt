@@ -1,0 +1,39 @@
+---
+import Logo from "../assets/icon_logo.svg";
+---
+
+<header
+  class="fixed z-10 flex w-full items-stretch justify-between bg-indigo/60 px-6 py-4 backdrop-blur-md transition-all duration-300 lg:py-0"
+>
+  <div class="relative z-20 flex items-center">
+    <a href="/" aria-label="Accueil">
+      <Logo class="h-16 w-16" />
+    </a>
+    <h3 class="px-5 text-white">Tp1_LolaBrouart | MMi2 A2</h3>
+  </div>
+
+  <div class="relative z-20 flex items-center">
+    <nav
+      class="visible fixed inset-0 z-10 bg-indigo text-2xl text-white opacity-100 transition-all duration-300 ease-in-out max-lg:aria-hidden:invisible max-lg:aria-hidden:opacity-0 lg:relative lg:flex lg:items-center lg:bg-transparent lg:text-sm lg:font-bold lg:tracking-wide lg:text-white lg:uppercase lg:opacity-100"
+      id="menu"
+      aria-hidden="true"
+    >
+      <ul
+        class="mx-16 mt-[25vh] *:relative *:overflow-hidden lg:m-0 lg:flex *:lg:before:absolute *:lg:before:bottom-0 *:lg:before:left-0 *:lg:before:h-2 *:lg:before:w-full *:lg:before:translate-y-2 *:lg:before:bg-white *:lg:before:transition-all *:lg:before:duration-300 *:lg:before:ease-in-out *:lg:hover:before:translate-y-0"
+      >
+        <li>
+          <a class="block px-5 py-4 lg:py-8" href="/configurateur"
+            >Créer ma chaussure</a
+          >
+        </li>
+        <li>
+          <a class="block px-5 py-4 lg:py-8" href="/baskets"
+            >Les baskets</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script src="../js/header.js"></script>

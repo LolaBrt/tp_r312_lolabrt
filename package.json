@@ -9,9 +9,12 @@
     "dev": "bun --bun run astro dev",
     "build": "bun --bun run astro build",
     "preview": "bun --bun run astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:css": "npx @tailwindcss/cli -i src/styles/global.css -o public/output.css"
   },
   "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource/erica-one": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.2",
     "tailwindcss": "^4.3.3"
@@ -20,6 +23,6 @@
     "esbuild": true
   },
   "devDependencies": {
-    "daisyui": "^5.7.36"
+    "daisyui": "^5.7.43"
   }
 }

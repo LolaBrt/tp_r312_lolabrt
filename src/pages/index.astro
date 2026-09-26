@@ -10,7 +10,7 @@ const baskets: Basket[] = db
 ---
 
 <Layout>
-  <h1 class="text-3xl font-bold underline text-primary">Hello world!</h1>
+  <h1>Un super site de baskets</h1>
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {
       baskets.map((basket) => (
@@ -23,7 +23,7 @@ const baskets: Basket[] = db
             <h2 class="card-title">{basket.description}</h2>
 
             <div class="card-actions justify-end">
-              <a href={`/baskets/${basket.id}`} class="btn btn-primary">
+              <a href={`/baskets/${basket.id}`} class="btn bg-orange-400 text-white uppercase">
                 Modifier
               </a>
             </div>

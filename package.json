@@ -17,6 +17,7 @@
     "@fontsource/erica-one": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.2",
+    "openai": "^7.23.0",
     "tailwindcss": "^4.3.3"
   },
   "allowScripts": {

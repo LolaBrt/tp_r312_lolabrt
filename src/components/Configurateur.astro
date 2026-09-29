@@ -48,6 +48,17 @@ const configuration_basket = configuration ?? configuration_defaut;
     <button type="submit">Valider</button>
     <button type="button" class="reinitialiser">Réinitialiser</button>
   </form>
+  <div class="chat-ia flex flex-col items-center gap-2 w-full max-w-md py-4">
+    <textarea
+      class="chat-message textarea textarea-bordered w-full bg-white text-black"
+      placeholder="Ex : une semelle noire et des lacets rouge vif"></textarea>
+    <button
+      type="button"
+      class="chat-button px-4 py-2 bg-orange-400 text-white rounded hover:bg-secondary"
+    >
+      Demander à l'IA
+    </button>
+  </div>
 </div>
 
 <script>
@@ -82,5 +93,62 @@ const configuration_basket = configuration ?? configuration_defaut;
             colorier(input.name, input.value);
           });
         });
+
+      // Chat IA : demande à l'API generateColors une couleur par partie à partir d'une description en langage naturel
+      const chatButton =
+        configurateur.querySelector<HTMLButtonElement>(".chat-button");
+      const chatMessage =
+        configurateur.querySelector<HTMLTextAreaElement>(".chat-message");
+      const historique: {
+        role: "user" | "assistant";
+        content: string;
+      }[] = [];
+
+      chatButton?.addEventListener("click", async () => {
+        const message = chatMessage?.value ?? "";
+        if (!message) return;
+
+        chatButton.disabled = true;
+        chatButton.textContent = "Réflexion en cours...";
+
+        // La configuration actuelle, lue depuis les inputs (pas depuis configurationDefaut) :
+        // l'IA doit connaître les couleurs déjà choisies pour ne modifier que ce qu'on lui demande
+        const configurationActuelle: Record<string, string> = {};
+        inputs.forEach((input) => {
+          configurationActuelle[input.name] = input.value;
+        });
+
+        try {
+          const res = await fetch("/api/generateColours", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message,
+              configuration: configurationActuelle,
+              historique,
+            }),
+          });
+          const { couleurs } = await res.json();
+          historique.push(
+            { role: "user", content: message },
+            {
+              role: "assistant",
+              content: JSON.stringify(couleurs),
+            },
+          );
+          
+          // On applique uniquement les couleurs renvoyées : une partie absente de la réponse garde sa couleur actuelle
+          inputs.forEach((input) => {
+            if (couleurs[input.name]) {
+              input.value = couleurs[input.name];
+              colorier(input.name, input.value);
+            }
+          });
+        } finally {
+          // finally, et pas juste après le fetch : le bouton doit se réactiver même si la requête échoue (réseau, erreur serveur...)
+          chatButton.disabled = false;
+          chatButton.textContent = "Demander à l'IA";
+        }
+      });
     });
 </script>

@@ -49,6 +49,10 @@ const configuration_basket = configuration ?? configuration_defaut;
     <button type="button" class="reinitialiser">Réinitialiser</button>
   </form>
   <div class="chat-ia flex flex-col items-center gap-2 w-full max-w-md py-4">
+    <div
+      class="chat-historique flex flex-col gap-2 w-full max-h-60 overflow-y-auto"
+    >
+    </div>
     <textarea
       class="chat-message textarea textarea-bordered w-full bg-white text-black"
       placeholder="Ex : une semelle noire et des lacets rouge vif"></textarea>
@@ -57,6 +61,10 @@ const configuration_basket = configuration ?? configuration_defaut;
       class="chat-button px-4 py-2 bg-orange-400 text-white rounded hover:bg-secondary"
     >
       Demander à l'IA
+    </button>
+
+    <button type="button" class="nouvelle-conversation">
+      Nouvelle conversation
     </button>
   </div>
 </div>
@@ -104,6 +112,48 @@ const configuration_basket = configuration ?? configuration_defaut;
         content: string;
       }[] = [];
 
+      const chatHistorique =
+        configurateur.querySelector<HTMLDivElement>(".chat-historique");
+
+      function afficherMessage(role: "user" | "assistant", texte: string) {
+        const bulle = document.createElement("div");
+
+        bulle.className = role === "user" ? "chat chat-end" : "chat chat-start";
+
+        const nom = role === "user" ? "Vous" : "IA";
+        const heure = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        bulle.innerHTML = `
+    <div class="chat-image avatar">
+      <div class="w-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
+        <span>${role === "user" ? "V" : "IA"}</span>
+      </div>
+    </div>
+
+    <div class="chat-header">
+      ${nom}
+      <time class="text-xs opacity-50">${heure}</time>
+    </div>
+
+    <div class="chat-bubble"></div>
+
+    <div class="chat-footer opacity-50">
+      ${role === "user" ? "Envoyé" : "Réponse de l’IA"}
+    </div>
+  `;
+
+        bulle.querySelector(".chat-bubble")!.textContent = texte;
+
+        chatHistorique?.appendChild(bulle);
+        chatHistorique?.scrollTo({
+          top: chatHistorique.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
       chatButton?.addEventListener("click", async () => {
         const message = chatMessage?.value ?? "";
         if (!message) return;
@@ -129,6 +179,7 @@ const configuration_basket = configuration ?? configuration_defaut;
             }),
           });
           const { couleurs } = await res.json();
+
           historique.push(
             { role: "user", content: message },
             {
@@ -136,7 +187,15 @@ const configuration_basket = configuration ?? configuration_defaut;
               content: JSON.stringify(couleurs),
             },
           );
-          
+
+          afficherMessage("user", message);
+          afficherMessage(
+            "assistant",
+            `Couleurs appliquées : ${Object.keys(couleurs).join(", ")}`,
+          );
+
+          chatMessage.value = "";
+
           // On applique uniquement les couleurs renvoyées : une partie absente de la réponse garde sa couleur actuelle
           inputs.forEach((input) => {
             if (couleurs[input.name]) {

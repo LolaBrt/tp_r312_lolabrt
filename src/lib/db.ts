@@ -35,5 +35,3 @@ db.run(`CREATE TABLE IF NOT EXISTS BASKETS (
 )`);
 
 export default db;
-
-db.query("SELECT * FROM BASKETS").all();

@@ -1,0 +1,77 @@
+---
+export const prerender = false;
+import Layout from "../layouts/Layout.astro";
+
+if (Astro.locals.user) return Astro.redirect("/baskets");
+---
+
+<Layout title="Connexion" description="Page de connexion">
+  <form id="form" class="flex flex-col gap-3 w-full max-w-sm mx-auto py-10">
+    <h1>Connexion</h1>
+    <input
+      name="name"
+      placeholder="Nom (pour créer un compte)"
+      class="input input-bordered"
+    />
+    <input
+      name="email"
+      type="email"
+      placeholder="Email"
+      class="input input-bordered"
+      required
+    />
+    <input
+      name="password"
+      type="password"
+      placeholder="Mot de passe (8 caractères min.)"
+      class="input input-bordered"
+      required
+    />
+    <p id="error" class="text-error"></p>
+    <button type="button" id="login" class="btn btn-primary"
+      >Se connecter</button
+    >
+    <button type="button" id="signup" class="btn btn-outline"
+      >Créer un compte
+    </button>
+    
+    <button type="button" id="google" class="btn btn-outline"
+      >Se connecter avec Google</button
+    >
+  </form>
+</Layout>
+
+<script>
+  import { authClient } from "../lib/auth-client";
+
+  const form = document.querySelector<HTMLFormElement>("#form")!;
+  const error = document.querySelector("#error")!;
+
+  async function submit(mode: "login" | "signup") {
+    const d = new FormData(form);
+    const email = d.get("email") as string;
+    const password = d.get("password") as string;
+    const name = (d.get("name") as string) || email;
+
+    const { error: err } =
+      mode === "login"
+        ? await authClient.signIn.email({ email, password })
+        : await authClient.signUp.email({ name, email, password });
+
+    if (err) error.textContent = err.message ?? "Erreur";
+    else window.location.href = "/baskets";
+  }
+
+  document
+    .querySelector("#login")!
+    .addEventListener("click", () => submit("login"));
+  document
+    .querySelector("#signup")!
+    .addEventListener("click", () => submit("signup"));
+
+  document
+    .querySelector("#google")!
+    .addEventListener("click", () =>
+      authClient.signIn.social({ provider: "google", callbackURL: "/baskets" }),
+    );
+</script>

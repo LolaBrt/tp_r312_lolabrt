@@ -13,10 +13,14 @@
     "build:css": "npx @tailwindcss/cli -i src/styles/global.css -o public/output.css"
   },
   "dependencies": {
+    "@astrojs/node": "^11.1.6",
+    "@auth/core": "^0.41.3",
     "@fontsource-variable/manrope": "^5.3.0",
     "@fontsource/erica-one": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.2",
+    "auth-astro": "^4.2.0",
+    "better-auth": "^1.7.7",
     "openai": "^7.23.0",
     "tailwindcss": "^4.3.3"
   },

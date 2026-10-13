@@ -1,5 +1,6 @@
 ---
 import Logo from "../assets/icon_logo.svg";
+const user = Astro.locals.user;
 ---
 
 <header
@@ -27,13 +28,30 @@ import Logo from "../assets/icon_logo.svg";
           >
         </li>
         <li>
-          <a class="block px-5 py-4 lg:py-8" href="/baskets"
-            >Les baskets</a
-          >
+          <a class="block px-5 py-4 lg:py-8" href="/baskets">Les baskets</a>
         </li>
       </ul>
+      {
+        user && (
+          <button
+            id="logout"
+            class="btn btn-sm mx-5 my-4 lg:my-8 bg-orange-400 text-white hover:bg-orange-600"
+          >
+            Déconnexion ({user.name})
+          </button>
+        )
+      }
     </nav>
   </div>
 </header>
+
+<script>
+  import { authClient } from "../lib/auth-client";
+
+  document.querySelector("#logout")?.addEventListener("click", async () => {
+    await authClient.signOut();
+    window.location.href = "/login";
+  });
+</script>
 
 <script src="../js/header.js"></script>

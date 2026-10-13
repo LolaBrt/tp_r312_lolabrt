@@ -1,5 +1,7 @@
 export const prerender = false;
 
+import db from "../../lib/db";
+
 import { OpenAI } from "openai";
 
 const INFERENCE_API_KEY = import.meta.env.INFERENCE_API_KEY;
@@ -8,12 +10,86 @@ const INFERENCE_MODEL = import.meta.env.INFERENCE_MODEL ?? "google/gemma-3-27b-i
 // Les 8 parties personnalisables de la basket : le modèle ne doit renvoyer que ces clés
 const PARTIES = ["semelle", "empeigne", "pointe", "oeillet", "bande", "languette", "lacet", "trimestre"];
 
-export const POST = async ({ request }) => {
+export const POST = async ({ request, locals }) => {
   const {
     message,
     configuration,
     historique = [],
   } = await request.json();
+
+  const userId = locals.user?.id;
+
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: "Non authentifié" }),
+    {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  }
+
+const endpoint = "generateColours";
+const limite = 10;
+const fenetreSecondes = 60 * 60;
+const maintenant = Math.floor(Date.now() / 1000);
+const debutFenetre = maintenant - fenetreSecondes;
+
+let limiteAtteinte = false;
+
+try {
+  db.exec("BEGIN IMMEDIATE");
+
+  const result = db
+    .query(`
+      SELECT COUNT(*) AS count
+      FROM RATE_LIMIT_EVENTS
+      WHERE user_id = ?
+        AND endpoint = ?
+        AND created_at >= ?
+    `)
+    .get(userId, endpoint, debutFenetre);
+
+  const nombreRequetes = Number(result?.count ?? 0);
+
+  if (nombreRequetes >= limite) {
+    limiteAtteinte = true;
+    db.exec("ROLLBACK");
+  } else {
+    db
+      .query(`
+        INSERT INTO RATE_LIMIT_EVENTS (user_id, endpoint, created_at)
+        VALUES (?, ?, ?)
+      `)
+      .run(userId, endpoint, maintenant);
+
+    db.exec("COMMIT");
+  }
+} catch (error) {
+  try {
+    db.exec("ROLLBACK");
+  } catch (rollbackError) {
+    console.error("Impossible d'annuler la transaction SQLite :", rollbackError);
+  }
+
+  console.error("Erreur lors du rate limiting :", error);
+  throw error;
+}
+
+if (limiteAtteinte) {
+  return new Response(
+    JSON.stringify({
+      error: "Trop de requêtes. Réessayez plus tard.",
+    }),
+    {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        "Retry-After": String(fenetreSecondes),
+      },
+    },
+  );
+}
 
   const historiqueValide = historique
   .filter(
@@ -68,4 +144,6 @@ export const POST = async ({ request }) => {
   return new Response(JSON.stringify({ couleurs }), {
     headers: { "Content-Type": "application/json" },
   });
+
+  
 };

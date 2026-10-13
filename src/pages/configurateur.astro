@@ -34,7 +34,7 @@ if (Astro.request.method === "POST") {
     `INSERT INTO BASKETS (user_id, description, semelle, empeigne, pointe, oeillet, bande, languette, lacet, trimestre)
    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      1, // user_id : à remplacer plus tard par un véritable utilisateur connecté
+      Astro.locals.user!.id, // user_id : à remplacer plus tard par un véritable utilisateur connecté
       description,
       configuration_recue.semelle,
       configuration_recue.empeigne,

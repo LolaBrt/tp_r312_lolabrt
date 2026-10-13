@@ -4,7 +4,9 @@ import BasketProfil from "../components/BasketProfil.astro";
 import db from "../lib/db.js";
 import type { Basket } from "../lib/db.ts";
 
-const baskets: Basket[] = db.prepare("SELECT * FROM BASKETS").all();
+const baskets: Basket[] = db
+  .prepare("SELECT * FROM BASKETS WHERE user_id = ?")
+  .all(Astro.locals.user!.id);
 ---
 
 <Layout>
@@ -20,7 +22,7 @@ const baskets: Basket[] = db.prepare("SELECT * FROM BASKETS").all();
             <h2 class="card-title">{basket.description}</h2>
 
             <div class="card-actions justify-end">
-              <a href={`/baskets/${basket.id}`} class="btn btn-primary">
+              <a href={`/baskets/${basket.id}`} class="btn">
                 Modifier
               </a>
             </div>

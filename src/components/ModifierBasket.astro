@@ -57,7 +57,7 @@ if (Astro.request.method === "POST") {
     `UPDATE BASKETS
      SET description = ?, semelle = ?, empeigne = ?, pointe = ?,
          oeillet = ?, bande = ?, languette = ?, lacet = ?, trimestre = ?
-     WHERE id = ?`,
+     WHERE id = ? AND user_id = ?`,
     [
       description,
       configuration_basket.semelle,
@@ -69,6 +69,7 @@ if (Astro.request.method === "POST") {
       configuration_basket.lacet,
       configuration_basket.trimestre,
       id,
+      Astro.locals.user!.id,
     ],
   );
 }

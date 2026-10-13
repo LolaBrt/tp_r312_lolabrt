@@ -178,7 +178,21 @@ const configuration_basket = configuration ?? configuration_defaut;
               historique,
             }),
           });
-          const { couleurs } = await res.json();
+        const donnees = await res.json();
+
+        if (res.status === 429) {
+        afficherMessage(
+          "assistant",
+         "Vous avez atteint la limite de générations. Réessayez dans une heure.",
+        );
+        return;
+        }
+
+        if (!res.ok) {
+            throw new Error(donnees.error ?? "Erreur lors de la génération des couleurs");
+        }
+
+        const { couleurs } = donnees;
 
           historique.push(
             { role: "user", content: message },

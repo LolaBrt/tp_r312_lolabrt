@@ -7,8 +7,8 @@ const db = new Database(new URL("../../data/db.sqlite", import.meta.url).pathnam
 db.exec("PRAGMA journal_mode = WAL;");
 
 export interface Basket {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   description: string;
   semelle: string;
   empeigne: string;
@@ -22,7 +22,7 @@ export interface Basket {
 
 db.run(`CREATE TABLE IF NOT EXISTS BASKETS (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL REFERENCES user(id),
   description TEXT,
   semelle TEXT DEFAULT '#ffffff',
   empeigne TEXT DEFAULT '#ffffff',
@@ -33,5 +33,15 @@ db.run(`CREATE TABLE IF NOT EXISTS BASKETS (
   lacet TEXT DEFAULT '#ffffff',
   trimestre TEXT DEFAULT '#ffffff'
 )`);
+
+db.run(`CREATE TABLE IF NOT EXISTS RATE_LIMIT_EVENTS (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  endpoint TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+)`);
+
+db.run(`CREATE INDEX IF NOT EXISTS idx_rate_limit_user_endpoint_time
+  ON RATE_LIMIT_EVENTS(user_id, endpoint, created_at)`);
 
 export default db;

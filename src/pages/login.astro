@@ -1,11 +1,14 @@
 ---
 export const prerender = false;
 import Layout from "../layouts/Layout.astro";
+import { getTranslations } from "../i18n";
 
 if (Astro.locals.user) return Astro.redirect("/baskets");
+
+const t = getTranslations("fr");
 ---
 
-<Layout title="Connexion" description="Page de connexion">
+<Layout title={t.login.title} description="Page de connexion" locale="fr">
   <form id="form" class="flex flex-col gap-3 w-full max-w-sm mx-auto py-10">
     <h1>Connexion</h1>
     <input
@@ -34,7 +37,7 @@ if (Astro.locals.user) return Astro.redirect("/baskets");
     <button type="button" id="signup" class="btn btn-outline"
       >Créer un compte
     </button>
-    
+
     <button type="button" id="google" class="btn btn-outline"
       >Se connecter avec Google</button
     >

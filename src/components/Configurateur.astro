@@ -1,9 +1,11 @@
 ---
 import BasketProfil from "./BasketProfil.astro";
 import BasketDessus from "./BasketDessus.astro";
+import { getTranslations } from "../i18n";
 
 interface Props {
   configuration?: Record<string, string>;
+  locale?: "fr" | "en";
 }
 
 const configuration_defaut = {
@@ -18,35 +20,57 @@ const configuration_defaut = {
 };
 
 // Si une configuration a été transmise (après un POST), on l'utilise ; sinon on prend les valeurs par défaut
-const { configuration } = Astro.props;
+const { configuration, locale = "fr" } = Astro.props;
 const configuration_basket = configuration ?? configuration_defaut;
+const t = getTranslations(locale);
 ---
 
 <div
   class="configurateur flex flex-col items-center"
   data-configuration-defaut={JSON.stringify(configuration_defaut)}
+  data-locale={locale}
+  data-thinking={t.configurator.thinking}
+  data-applied={t.configurator.applied}
+  data-rate-limit={t.configurator.rateLimit}
+  data-sent={t.configurator.sent}
+  data-ai-reply={t.configurator.aiReply}
+  data-ask-ai={t.configurator.askAi}
 >
   <BasketProfil {...configuration_basket} />
   <BasketDessus {...configuration_basket} />
 
   <form
     method="POST"
-    class="flex flex-wrap items-center justify-center gap-4 py-2"
+    class="flex flex-col items-center gap-4 py-2"
   >
-    <label for="description">Nom de la basket :</label>
-    <input type="text" id="description" name="description" required />
-    {
-      Object.entries(configuration_basket).map(([partie, couleur]) => (
-        <div class="flex flex-col items-center">
-          <label for={partie} class="text-sm capitalize">
-            {partie}
-          </label>
-          <input type="color" id={partie} name={partie} value={couleur} />
-        </div>
-      ))
-    }
-    <button type="submit">Valider</button>
-    <button type="button" class="reinitialiser">Réinitialiser</button>
+    <div class="flex flex-col items-center gap-2">
+      <label for="description">{t.configurator.name}</label>
+      <input
+        type="text"
+        id="description"
+        name="description"
+        class="input input-bordered bg-white text-black"
+        required
+      />
+    </div>
+
+    <div class="flex flex-wrap items-center justify-center gap-4">
+      {
+        Object.entries(configuration_basket).map(([partie, couleur]) => (
+          <div class="flex flex-col items-center">
+            <label for={partie} class="text-sm">
+              {t.configurator.parts[partie as keyof typeof t.configurator.parts]}
+            </label>
+            <input type="color" id={partie} name={partie} value={couleur} />
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-4">
+      <button type="submit">{t.configurator.validate}</button>
+      <button type="button" class="reinitialiser">{t.configurator.reset}</button>
+    </div>
   </form>
   <div class="chat-ia flex flex-col items-center gap-2 w-full max-w-md py-4">
     <div
@@ -55,16 +79,16 @@ const configuration_basket = configuration ?? configuration_defaut;
     </div>
     <textarea
       class="chat-message textarea textarea-bordered w-full bg-white text-black"
-      placeholder="Ex : une semelle noire et des lacets rouge vif"></textarea>
+      placeholder={t.configurator.placeholder}></textarea>
     <button
       type="button"
       class="chat-button px-4 py-2 bg-orange-400 text-white rounded hover:bg-secondary"
     >
-      Demander à l'IA
+      {t.configurator.askAi}
     </button>
 
     <button type="button" class="nouvelle-conversation">
-      Nouvelle conversation
+      {t.configurator.newConversation}
     </button>
   </div>
 </div>
@@ -76,6 +100,18 @@ const configuration_basket = configuration ?? configuration_defaut;
       const configurationDefaut: Record<string, string> = JSON.parse(
         configurateur.dataset.configurationDefaut ?? "{}",
       );
+      const locale = configurateur.dataset.locale === "en" ? "en" : "fr";
+      const thinkingText = configurateur.dataset.thinking ?? "Thinking...";
+      const appliedText =
+        configurateur.dataset.applied ?? "Applied colors:";
+      const rateLimitText =
+        configurateur.dataset.rateLimit ??
+        "You have reached the generation limit.";
+      const sentText = configurateur.dataset.sent ?? "Sent";
+      const aiReplyText = configurateur.dataset.aiReply ?? "AI response";
+      const askAiText =
+        configurateur.dataset.askAi ??
+        (locale === "en" ? "Ask AI" : "Demander à l'IA");
 
       const inputs = configurateur.querySelectorAll<HTMLInputElement>(
         'input[type="color"]',
@@ -120,7 +156,7 @@ const configuration_basket = configuration ?? configuration_defaut;
 
         bulle.className = role === "user" ? "chat chat-end" : "chat chat-start";
 
-        const nom = role === "user" ? "Vous" : "IA";
+        const nom = role === "user" ? (locale === "en" ? "You" : "Vous") : "AI";
         const heure = new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -141,7 +177,7 @@ const configuration_basket = configuration ?? configuration_defaut;
     <div class="chat-bubble"></div>
 
     <div class="chat-footer opacity-50">
-      ${role === "user" ? "Envoyé" : "Réponse de l’IA"}
+      ${role === "user" ? sentText : aiReplyText}
     </div>
   `;
 
@@ -159,7 +195,7 @@ const configuration_basket = configuration ?? configuration_defaut;
         if (!message) return;
 
         chatButton.disabled = true;
-        chatButton.textContent = "Réflexion en cours...";
+        chatButton.textContent = thinkingText;
 
         // La configuration actuelle, lue depuis les inputs (pas depuis configurationDefaut) :
         // l'IA doit connaître les couleurs déjà choisies pour ne modifier que ce qu'on lui demande
@@ -176,21 +212,19 @@ const configuration_basket = configuration ?? configuration_defaut;
               message,
               configuration: configurationActuelle,
               historique,
+              locale,
             }),
           });
-        const donnees = await res.json();
+          const donnees = await res.json();
 
-        if (res.status === 429) {
-        afficherMessage(
-          "assistant",
-         "Vous avez atteint la limite de générations. Réessayez dans une heure.",
-        );
-        return;
-        }
+          if (res.status === 429) {
+            afficherMessage("assistant", rateLimitText);
+            return;
+          }
 
-        if (!res.ok) {
+          if (!res.ok) {
             throw new Error(donnees.error ?? "Erreur lors de la génération des couleurs");
-        }
+          }
 
         const { couleurs } = donnees;
 
@@ -205,7 +239,7 @@ const configuration_basket = configuration ?? configuration_defaut;
           afficherMessage("user", message);
           afficherMessage(
             "assistant",
-            `Couleurs appliquées : ${Object.keys(couleurs).join(", ")}`,
+            `${appliedText} ${Object.keys(couleurs).join(", ")}`,
           );
 
           chatMessage.value = "";
@@ -220,7 +254,7 @@ const configuration_basket = configuration ?? configuration_defaut;
         } finally {
           // finally, et pas juste après le fetch : le bouton doit se réactiver même si la requête échoue (réseau, erreur serveur...)
           chatButton.disabled = false;
-          chatButton.textContent = "Demander à l'IA";
+          chatButton.textContent = askAiText;
         }
       });
     });

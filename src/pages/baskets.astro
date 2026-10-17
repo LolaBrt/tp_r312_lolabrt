@@ -3,13 +3,16 @@ import Layout from "../layouts/Layout.astro";
 import BasketProfil from "../components/BasketProfil.astro";
 import db from "../lib/db.js";
 import type { Basket } from "../lib/db.ts";
+import { getTranslations } from "../i18n";
+
+const t = getTranslations("fr");
 
 const baskets: Basket[] = db
   .prepare("SELECT * FROM BASKETS WHERE user_id = ?")
   .all(Astro.locals.user!.id);
 ---
 
-<Layout>
+<Layout title={t.home.title} locale="fr">
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {
       baskets.map((basket) => (

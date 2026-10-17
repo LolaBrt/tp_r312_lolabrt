@@ -3,14 +3,16 @@ import Layout from "../layouts/Layout.astro";
 import BasketProfil from "../components/BasketProfil.astro";
 import db from "../lib/db.js";
 import type { Basket } from "../lib/db.ts";
+import { getTranslations } from "../i18n";
+
+const t = getTranslations("fr");
 
 const baskets: Basket[] = db
-  .prepare("SELECT * FROM BASKETS ORDER BY id DESC LIMIT 3")
-  .all();
+  .prepare("SELECT * FROM BASKETS WHERE user_id = ? ORDER BY id DESC")
+  .all(Astro.locals.user!.id);
 ---
 
-<Layout>
-  <h1>Un super site de baskets</h1>
+<Layout title={t.home.title} locale="fr">
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {
       baskets.map((basket) => (
@@ -23,8 +25,8 @@ const baskets: Basket[] = db
             <h2 class="card-title">{basket.description}</h2>
 
             <div class="card-actions justify-end">
-              <a href={`/baskets/${basket.id}`} class="btn bg-orange-400 text-white uppercase">
-                Modifier
+              <a href={`/baskets/${basket.id}`} class="btn">
+                {t.navigation.edit}
               </a>
             </div>
           </div>

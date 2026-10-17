@@ -8,10 +8,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const result = await auth.api.getSession({ headers: context.request.headers });
   context.locals.user = result?.user ?? null;
 
-  if (context.locals.user || pathname === "/login") return next();
+  if (
+    context.locals.user ||
+    pathname === "/login" ||
+    pathname === "/en/login"
+  ) {
+    return next();
+  }
 
   if (pathname.startsWith("/api/")) {
     return new Response("Non authentifié", { status: 401 });
   }
-  return context.redirect("/login");
-  });
+  return context.redirect(
+    pathname === "/en" || pathname.startsWith("/en/")
+      ? "/en/login"
+      : "/login",
+  );
+});

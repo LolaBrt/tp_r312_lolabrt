@@ -1,11 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Configurateur from "../components/Configurateur.astro";
+import { getTranslations } from "../i18n";
 
 import db from "../lib/db.js";
 import type { Basket } from "../lib/db.js";
 
 export const prerender = false;
+
+const t = getTranslations("fr");
 
 const parties = [
   "semelle",
@@ -49,6 +52,6 @@ if (Astro.request.method === "POST") {
 }
 ---
 
-<Layout>
-  <Configurateur configuration={configuration_recue} />
+<Layout title={t.configurator.title} locale="fr">
+  <Configurateur configuration={configuration_recue} locale="fr" />
 </Layout>

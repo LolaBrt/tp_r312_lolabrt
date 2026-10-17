@@ -20,6 +20,47 @@
         @apply font-sans text-base leading-normal text-indigo;
     }
 
+    html.dark body {
+        background-color: var(--color-indigo);
+        color: oklch(89.7% 0.057 293.283);
+    }
+
+    html.dark h2,
+    html.dark h3,
+    html.dark label,
+    html.dark p,
+    html.dark a:not(.btn) {
+        color: oklch(89.7% 0.057 293.283);
+    }
+
+    html.dark .card,
+    html.dark .card-body {
+        background-color: oklch(78% 0.08 278);
+        color: var(--color-indigo);
+    }
+
+    html.dark .card-title {
+        color: var(--color-indigo);
+    }
+
+    html.dark header.bg-indigo\/60 {
+        background-color: oklch(20% 0.15 278.05) !important;
+    }
+
+    html.dark header nav.bg-indigo {
+        background-color: oklch(20% 0.15 278.05) !important;
+    }
+
+    html.dark footer.grille.bg-indigo-300 {
+        background-color: oklch(65% 0.12 278) !important;
+        color: oklch(89.7% 0.057 293.283) !important;
+    }
+
+    html.dark footer.grille.bg-indigo-300 h3,
+    html.dark footer.grille.bg-indigo-300 a {
+        color: oklch(89.7% 0.057 293.283) !important;
+    }
+
     h1 {
         @apply text-4xl font-display leading-tight lg:text-6xl text-orange-500 pb-20;
     }
@@ -65,4 +106,14 @@
 
 .btn {
     @apply bg-orange-400 text-white font-bold py-2 px-4 rounded;
+}
+
+.theme-toggle {
+    background-color: oklch(89.7% 0.057 293.283);
+    color: var(--color-indigo);
+}
+
+html.dark .theme-toggle {
+    background-color: oklch(89.7% 0.057 293.283);
+    color: var(--color-indigo);
 }

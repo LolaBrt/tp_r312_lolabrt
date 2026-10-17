@@ -1,26 +1,63 @@
 ---
 import LogoFooter from "../assets/icon_logo.svg";
+
+interface Props {
+  locale?: "fr" | "en";
+}
+
+const { locale = "fr" } = Astro.props;
+const homePath = locale === "en" ? "/en/" : "/";
 ---
 
-<footer class="grille space-y-6 bg-indigo-300 px-6 py-16 text-sm lg:space-y-0">
-  <a class="block" href="/" aria-label="Accueil">
+<footer
+  class="grille space-y-6 bg-indigo-300 px-6 py-16 text-sm lg:space-y-0"
+  data-locale={locale}
+  data-theme={Astro.locals.user ? "account" : "browser"}
+>
+  <a class="block" href={homePath} aria-label={locale === "en" ? "Home" : "Accueil"}>
     <LogoFooter class="h-32 w-32" />
   </a>
 
-  <nav class="space-y-3 lg:col-span-3 lg:col-start-7">
-    <h3 class="text-sm tracking-wide text-indigo uppercase">Menu</h3>
-    <ul class="font-semibold text-indigo">
-      <li>
-        <a href="http://localhost:4321/species/">Les manchots</a>
-      </li>
-      <li>
-        <a href="http://localhost:4321/pizzas/"
-          >Les pizzas</a
-        >
-      </li>
-      <li>
-        <a href="http://localhost:4321/olympians/">Les JO</a>
-      </li>
-    </ul>
-  </nav>
+  <button
+    type="button"
+    id="theme-toggle"
+    class="theme-toggle h-fit self-start justify-self-end rounded px-3 py-1 text-sm font-bold lg:col-span-2 lg:col-start-11"
+    aria-pressed="false"
+  >
+    {locale === "en" ? "Dark mode" : "Mode sombre"}
+  </button>
 </footer>
+
+<script>
+  const footer = document.querySelector("footer");
+  const themeToggle = footer?.querySelector<HTMLButtonElement>("#theme-toggle");
+  const locale = footer?.dataset.locale === "en" ? "en" : "fr";
+  const darkModeLabel = locale === "en" ? "Dark mode" : "Mode sombre";
+  const lightModeLabel = locale === "en" ? "Light mode" : "Mode clair";
+
+  function updateThemeButton() {
+    const isDark = document.documentElement.classList.contains("dark");
+    if (!themeToggle) return;
+    themeToggle.textContent = isDark ? lightModeLabel : darkModeLabel;
+    themeToggle.setAttribute("aria-pressed", String(isDark));
+  }
+
+  updateThemeButton();
+
+  themeToggle?.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    const theme = isDark ? "dark" : "light";
+    localStorage.setItem("theme", theme);
+    updateThemeButton();
+
+    if (footer?.dataset.theme === "account") {
+      fetch("/api/theme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme }),
+      }).catch((error) => {
+        console.error("Impossible d'enregistrer la préférence de thème :", error);
+      });
+    }
+  });
+</script>

@@ -2,6 +2,7 @@
 import BasketProfil from "./BasketProfil.astro";
 import BasketDessus from "./BasketDessus.astro";
 import db from "../lib/db.js";
+import { getTranslations } from "../i18n";
 
 interface Props {
   id: number;
@@ -14,6 +15,7 @@ interface Props {
   languette: string;
   lacet: string;
   trimestre: string;
+  locale?: "fr" | "en";
 }
 
 const {
@@ -26,7 +28,9 @@ const {
   languette,
   lacet,
   trimestre,
+  locale = "fr",
 } = Astro.props;
+const t = getTranslations(locale);
 
 let { description } = Astro.props;
 
@@ -84,10 +88,10 @@ if (Astro.request.method === "POST") {
 
   <form
     method="POST"
-    action={`/baskets/${id}`}
+    action={`${locale === "en" ? "/en" : ""}/baskets/${id}`}
     class="flex flex-wrap items-center justify-center gap-4 py-2"
   >
-    <label for="description">Nom de la basket :</label>
+    <label for="description">{t.configurator.name}</label>
     <input
       type="text"
       id="description"
@@ -98,15 +102,15 @@ if (Astro.request.method === "POST") {
     {
       Object.entries(configuration_basket).map(([partie, couleur]) => (
         <div class="flex flex-col items-center">
-          <label for={partie} class="text-sm capitalize">
-            {partie}
+          <label for={partie} class="text-sm">
+            {t.configurator.parts[partie as keyof typeof t.configurator.parts]}
           </label>
           <input type="color" id={partie} name={partie} value={couleur} />
         </div>
       ))
     }
-    <button type="submit">Valider</button>
-    <button type="button" class="reinitialiser">Réinitialiser</button>
+    <button type="submit">{t.configurator.validate}</button>
+    <button type="button" class="reinitialiser">{t.configurator.reset}</button>
   </form>
 </div>
 

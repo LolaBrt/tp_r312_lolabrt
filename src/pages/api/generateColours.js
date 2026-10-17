@@ -15,6 +15,7 @@ export const POST = async ({ request, locals }) => {
     message,
     configuration,
     historique = [],
+    locale = "fr",
   } = await request.json();
 
   const userId = locals.user?.id;
@@ -79,7 +80,10 @@ try {
 if (limiteAtteinte) {
   return new Response(
     JSON.stringify({
-      error: "Trop de requêtes. Réessayez plus tard.",
+      error:
+        locale === "en"
+          ? "Too many requests. Please try again later."
+          : "Trop de requêtes. Réessayez plus tard.",
     }),
     {
       status: 429,
@@ -110,12 +114,19 @@ if (limiteAtteinte) {
       {
         role: "system",
         content:
-          `Tu choisis les couleurs d'une paire de basket personnalisée. ` +
-          `Réponds UNIQUEMENT avec un objet JSON, sans aucun texte autour, contenant exactement ces clés : ${PARTIES.join(", ")}. ` +
-          `Chaque valeur doit être une couleur au format hexadécimal #rrggbb. ` +
-          `Voici la configuration actuelle : ${JSON.stringify(configuration)}. ` +
-          `Voici l'historique des messages : ${JSON.stringify(historiqueValide)}. ` +
-          `Ne change que les parties mentionnées par l'utilisateur, garde les autres identiques.`,
+          locale === "en"
+            ? `You choose the colors of a customized pair of sneakers. ` +
+              `Reply ONLY with a JSON object, without any surrounding text, containing exactly these keys: ${PARTIES.join(", ")}. ` +
+              `Each value must be a hexadecimal color in the #rrggbb format. ` +
+              `Here is the current configuration: ${JSON.stringify(configuration)}. ` +
+              `Here is the message history: ${JSON.stringify(historiqueValide)}. ` +
+              `Only change the parts mentioned by the user and keep the others unchanged.`
+            : `Tu choisis les couleurs d'une paire de basket personnalisée. ` +
+              `Réponds UNIQUEMENT avec un objet JSON, sans aucun texte autour, contenant exactement ces clés : ${PARTIES.join(", ")}. ` +
+              `Chaque valeur doit être une couleur au format hexadécimal #rrggbb. ` +
+              `Voici la configuration actuelle : ${JSON.stringify(configuration)}. ` +
+              `Voici l'historique des messages : ${JSON.stringify(historiqueValide)}. ` +
+              `Ne change que les parties mentionnées par l'utilisateur, garde les autres identiques.`,
       },
       { role: "user", content: message },
     ],

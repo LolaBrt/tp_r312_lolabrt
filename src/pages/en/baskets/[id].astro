@@ -1,0 +1,20 @@
+---
+export const prerender = false;
+
+import Layout from "../../../layouts/Layout.astro";
+import ModifierBasket from "../../../components/ModifierBasket.astro";
+import db from "../../../lib/db.js";
+import type { Basket } from "../../../lib/db.ts";
+
+const basket: Basket | null = db
+  .prepare("SELECT * FROM BASKETS WHERE id = ? AND user_id = ?")
+  .get(Number(Astro.params.id), Astro.locals.user!.id);
+
+if (!basket) {
+  return Astro.redirect("/en/baskets");
+}
+---
+
+<Layout locale="en">
+  <ModifierBasket {...basket} locale="en" />
+</Layout>

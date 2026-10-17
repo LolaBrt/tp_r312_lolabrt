@@ -1,13 +1,29 @@
 ---
 import Logo from "../assets/icon_logo.svg";
+import { getTranslations } from "../i18n";
+
+interface Props {
+  locale?: "fr" | "en";
+}
+
+const { locale = "fr" } = Astro.props;
 const user = Astro.locals.user;
+const prefix = locale === "en" ? "/en" : "";
+const t = getTranslations(locale);
+const currentPath = Astro.url.pathname;
+const pathWithoutEnglishPrefix =
+  currentPath === "/en" ? "/" : currentPath.replace(/^\/en(?=\/|$)/, "");
+const frenchPath = pathWithoutEnglishPrefix || "/";
+const englishPath =
+  pathWithoutEnglishPrefix === "/" ? "/en/" : `/en${pathWithoutEnglishPrefix}`;
 ---
 
 <header
+  data-locale={locale}
   class="fixed z-10 flex w-full items-stretch justify-between bg-indigo/60 px-6 py-4 backdrop-blur-md transition-all duration-300 lg:py-0"
 >
   <div class="relative z-20 flex items-center">
-    <a href="/" aria-label="Accueil">
+    <a href={`${prefix}/`} aria-label={t.navigation.home}>
       <Logo class="h-16 w-16" />
     </a>
     <h3 class="px-5 text-white">Tp1_LolaBrouart | MMi2 A2</h3>
@@ -23,12 +39,15 @@ const user = Astro.locals.user;
         class="mx-16 mt-[25vh] *:relative *:overflow-hidden lg:m-0 lg:flex *:lg:before:absolute *:lg:before:bottom-0 *:lg:before:left-0 *:lg:before:h-2 *:lg:before:w-full *:lg:before:translate-y-2 *:lg:before:bg-white *:lg:before:transition-all *:lg:before:duration-300 *:lg:before:ease-in-out *:lg:hover:before:translate-y-0"
       >
         <li>
-          <a class="block px-5 py-4 lg:py-8" href="/configurateur"
-            >Créer ma chaussure</a
-          >
+          <a class="block px-5 py-4 lg:py-8" href={`${prefix}/configurateur`}>
+          {locale === "en" ? "Create my shoe" : "Créer ma chaussure"}
+        </a>
         </li>
         <li>
-          <a class="block px-5 py-4 lg:py-8" href="/baskets">Les baskets</a>
+          <a class="block px-5 py-4 lg:py-8" href={frenchPath}>FR</a>
+        </li>
+        <li>
+          <a class="block px-5 py-4 lg:py-8" href={englishPath}>EN</a>
         </li>
       </ul>
       {
@@ -37,7 +56,7 @@ const user = Astro.locals.user;
             id="logout"
             class="btn btn-sm mx-5 my-4 lg:my-8 bg-orange-400 text-white hover:bg-orange-600"
           >
-            Déconnexion ({user.name})
+            {t.navigation.logout} ({user.name})
           </button>
         )
       }
@@ -48,9 +67,12 @@ const user = Astro.locals.user;
 <script>
   import { authClient } from "../lib/auth-client";
 
+  const locale =
+    document.querySelector("header")?.dataset.locale === "en" ? "en" : "fr";
+
   document.querySelector("#logout")?.addEventListener("click", async () => {
     await authClient.signOut();
-    window.location.href = "/login";
+    window.location.href = locale === "en" ? "/en/login" : "/login";
   });
 </script>
 

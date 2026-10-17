@@ -44,4 +44,9 @@ db.run(`CREATE TABLE IF NOT EXISTS RATE_LIMIT_EVENTS (
 db.run(`CREATE INDEX IF NOT EXISTS idx_rate_limit_user_endpoint_time
   ON RATE_LIMIT_EVENTS(user_id, endpoint, created_at)`);
 
+db.run(`CREATE TABLE IF NOT EXISTS USER_PREFERENCES (
+  user_id TEXT PRIMARY KEY,
+  theme TEXT NOT NULL DEFAULT 'light' CHECK (theme IN ('light', 'dark'))
+)`);
+
 export default db;
